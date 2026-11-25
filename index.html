@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boolean Logic made easy: True or False</title>
+<style>
+:root{--bg:#f3f6f4;--ink:#17262b;--muted:#51666d;--panel:#fff;--line:#cfdad6;--on:#1f9d63;--off:#8a9aa1;--amber:#f5a400;--code:#14262c;--hl:#2b4a54}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1b1f;--ink:#e8f0f2;--muted:#9fb4ba;--panel:#16272d;--line:#2a4149;--off:#6f858c;--code:#091317}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:1020px;margin:0 auto;padding:26px 16px 56px}
+h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:clamp(1.9rem,5vw,3rem);line-height:1.1;margin:0 0 10px;max-width:20ch}
+h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:1.25rem;margin:0 0 8px}
+p{margin:0 0 10px;max-width:60ch}.lead{font-size:1.1rem;color:var(--muted)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--line);padding:1px 6px;border-radius:4px}
+.tabs{display:flex;gap:8px;margin:20px 0 12px}
+button{font:inherit;font-weight:600;border:2px solid var(--ink);border-radius:8px;padding:9px 18px;cursor:pointer;background:transparent;color:var(--ink)}
+button.fill,.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.rule{border-left:5px solid var(--amber);padding:2px 0 2px 14px;margin-bottom:16px}
+.rule b{font-size:1.15rem}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+@media (max-width:780px){.grid{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.switches{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.sw{min-width:150px;text-align:left}
+.sw[aria-pressed=true]{background:var(--on);border-color:var(--on);color:#fff}
+.sw[aria-pressed=false]{background:transparent}
+svg{width:100%;height:auto;display:block}
+.wire{stroke:var(--off);stroke-width:6;fill:none;stroke-linecap:round}
+.wire.on{stroke:var(--amber);stroke-dasharray:10 10;animation:flow .5s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.node circle{fill:var(--off);transition:fill .3s}.node.on circle{fill:var(--on)}
+.node text{fill:#fff;font-weight:700;font-size:18px;text-anchor:middle}
+.gate{fill:var(--panel);stroke:var(--ink);stroke-width:3}
+.gtxt{fill:var(--ink);font-weight:800;font-size:26px;text-anchor:middle}
+.bulb{fill:var(--off);transition:fill .3s,filter .3s}
+.bulb.lit{fill:var(--amber);filter:drop-shadow(0 0 14px var(--amber))}
+.btxt{fill:var(--ink);font-weight:700;font-size:16px;text-anchor:middle}
+.code{background:var(--code);color:#e8f1f5;border-radius:10px;padding:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem}
+.ln{padding:5px 14px;border-left:4px solid transparent;transition:background .25s}
+.ln.on{background:var(--hl);border-left-color:var(--amber)}
+.out{background:var(--code);color:#b8f2c9;font-family:ui-monospace,Menlo,Consolas,monospace;border-radius:10px;padding:10px 14px;min-height:46px;margin:10px 0 14px}
+table{border-collapse:collapse;width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+tr.hit td{background:var(--amber);color:#17262b;font-weight:700}
+.msg{min-height:3.4em;margin:10px 0 0}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 26px}
+.controls label{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:.9rem}
+.step{font-size:.88rem;color:var(--muted)}
+.quiz button{display:block;width:100%;text-align:left;margin:6px 0;border-color:var(--line)}
+.quiz .right{border-color:var(--on);background:rgba(31,157,99,.18)}.quiz .wrong{border-color:#d9534f;background:rgba(217,83,79,.16)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Boolean logic: every answer is True or False</h1>
+  <p class="lead">A computer makes decisions with only two answers: <code>True</code> (yes) and <code>False</code> (no). Three small words, <code>and</code>, <code>or</code>, <code>not</code>, combine those answers. Try them with the switches below.</p>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-g="AND" aria-selected="true">and</button>
+    <button role="tab" data-g="OR" aria-selected="false">or</button>
+    <button role="tab" data-g="NOT" aria-selected="false">not</button>
+  </div>
+  <div class="rule"><b id="rt"></b><p id="rr" style="margin:4px 0 0"></p></div>
+
+  <div class="grid">
+    <div class="box">
+      <div class="switches">
+        <button class="sw" id="swA" aria-pressed="true"></button>
+        <button class="sw" id="swB" aria-pressed="false"></button>
+      </div>
+      <svg viewBox="0 0 540 230" role="img" aria-label="Two switches feed a logic gate that lights a bulb">
+        <path id="wA" class="wire" d="M70,90 H200"/>
+        <path id="wB" class="wire" d="M70,140 H200"/>
+        <path id="wO" class="wire" d="M320,115 H425"/>
+        <g id="nA" class="node"><circle r="20"/><text y="6">A</text></g>
+        <g id="nB" class="node"><circle r="20"/><text y="6">B</text></g>
+        <rect class="gate" x="200" y="60" width="120" height="110" rx="14"/>
+        <text id="gt" class="gtxt" x="260" y="124"></text>
+        <circle id="bulb" class="bulb" cx="465" cy="115" r="32"/>
+        <rect x="451" y="145" width="28" height="12" rx="3" fill="var(--ink)"/>
+        <text id="bt" class="btxt" x="465" y="195"></text>
+      </svg>
+      <p class="msg" id="msg" aria-live="polite"></p>
+    </div>
+
+    <div>
+      <div class="code" id="code" aria-label="Python code"></div>
+      <div class="out" id="out"></div>
+      <table><thead id="th"></thead><tbody id="tb"></tbody></table>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="fill" id="next">Next</button>
+    <button id="play">Play</button>
+    <button id="reset">Reset</button>
+    <span class="step" id="count"></span>
+    <label>Speed <input type="range" id="spd" min="1" max="5" value="3"></label>
+  </div>
+
+  <div class="box quiz" id="quiz">
+    <h2>Quick check</h2>
+    <p>A is <code>True</code> and B is <code>False</code>. What is <code>A or B</code>?</p>
+    <button data-r="1">True, because one of them is True</button>
+    <button data-r="0">False, because B is False</button>
+    <p id="qres" class="step"></p>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const T=v=>v?"True":"False";
+const INFO={
+  AND:["and: both must be True","Real life: you enter the exam hall only if you have your ID card and your admit card. Missing one means no entry."],
+  OR:["or: at least one must be True","Real life: you can pay with cash or UPI. One is enough, and having both is also fine."],
+  NOT:["not: flips the answer","Real life: the light is ON, and not turns it into OFF. True becomes False, False becomes True."]
+};
+let gate="AND",A=true,B=false,i=0,timer=null;
+const op=()=>gate==="AND"?"a and b":gate==="OR"?"a or b":"not a";
+const R=()=>gate==="AND"?A&&B:gate==="OR"?A||B:!A;
+
+function lines(){
+  return gate==="NOT"?[`a = ${T(A)}`,`result = ${op()}`,"print(result)"]
+                     :[`a = ${T(A)}`,`b = ${T(B)}`,`result = ${op()}`,"print(result)"];
+}
+function steps(){
+  const r=R(),la=`a = ${T(A)}. Switch A is ${A?"ON":"OFF"}, so A is ${T(A)}.`;
+  const why=gate==="AND"?`"and" is True only when both are True.`:gate==="OR"?`"or" is True when at least one is True.`:`"not" flips True to False and False to True.`;
+  const calc=gate==="NOT"?`Python checks: not ${T(A)}. ${why} So result is ${T(r)}.`:`Python checks: ${T(A)} ${gate.toLowerCase()} ${T(B)}. ${why} So result is ${T(r)}.`;
+  const lb=`b = ${T(B)}. Switch B is ${B?"ON":"OFF"}, so B is ${T(B)}.`;
+  const pr=`print shows the answer on the screen: ${T(r)}. The bulb is ${r?"ON":"OFF"}.`;
+  if(gate==="NOT") return [
+    {l:-1,m:"Set switch A, then press Next."},
+    {l:0,m:la,sa:1},
+    {l:1,m:calc,sa:1,sr:1},
+    {l:2,m:pr,sa:1,sr:1,o:1}];
+  return [
+    {l:-1,m:"Set switches A and B, then press Next."},
+    {l:0,m:la,sa:1},
+    {l:1,m:lb,sa:1,sb:1},
+    {l:2,m:calc,sa:1,sb:1,sr:1},
+    {l:3,m:pr,sa:1,sb:1,sr:1,o:1}];
+}
+function render(){
+  const S=steps(),s=S[i],r=R(),bin=gate!=="NOT";
+  $("rt").textContent=INFO[gate][0];$("rr").textContent=INFO[gate][1];
+  $("swA").textContent="A: "+(A?"ON (True)":"OFF (False)");$("swA").setAttribute("aria-pressed",A);
+  $("swB").textContent="B: "+(B?"ON (True)":"OFF (False)");$("swB").setAttribute("aria-pressed",B);
+  $("swB").style.display=bin?"":"none";
+  // circuit
+  const ya=bin?90:115;
+  $("wA").setAttribute("d",`M70,${ya} H200`);$("nA").setAttribute("transform",`translate(50,${ya})`);
+  $("nB").setAttribute("transform","translate(50,140)");
+  $("wB").style.display=$("nB").style.display=bin?"":"none";
+  $("nA").classList.toggle("on",A);$("nB").classList.toggle("on",B);
+  $("wA").classList.toggle("on",!!s.sa&&A);$("wB").classList.toggle("on",!!s.sb&&B);
+  $("wO").classList.toggle("on",!!s.sr&&r);
+  $("bulb").classList.toggle("lit",!!s.sr&&r);
+  $("gt").textContent=gate==="NOT"?"NOT":gate;
+  $("bt").textContent=s.sr?("Bulb: "+(r?"ON":"OFF")):"Bulb";
+  // code
+  $("code").innerHTML=lines().map((t,k)=>`<div class="ln${k===s.l?" on":""}">${t}</div>`).join("");
+  $("out").textContent=s.o?T(r):"Output appears here";
+  $("msg").textContent=s.m;
+  $("count").textContent=`Step ${i} of ${S.length-1}`;
+  $("next").disabled=i>=S.length-1;
+  // truth table
+  const rows=bin?[[1,1],[1,0],[0,1],[0,0]]:[[1],[0]];
+  $("th").innerHTML="<tr>"+(bin?"<th>A</th><th>B</th>":"<th>A</th>")+"<th>Result</th></tr>";
+  $("tb").innerHTML=rows.map(v=>{
+    const res=gate==="AND"?v[0]&&v[1]:gate==="OR"?v[0]||v[1]:!v[0];
+    const hit=s.sr&&v[0]===+A&&(!bin||v[1]===+B);
+    return `<tr class="${hit?"hit":""}">`+v.map(x=>`<td>${T(x)}</td>`).join("")+`<td>${T(res)}</td></tr>`}).join("");
+}
+function stop(){clearInterval(timer);timer=null;$("play").textContent="Play"}
+function go(){if(i<steps().length-1){i++;render()}else stop()}
+const delay=()=>3000-$("spd").value*500;
+function reset(){stop();i=0;render()}
+$("next").onclick=()=>{stop();go()};
+$("play").onclick=()=>{
+  if(timer){stop();return}
+  if(i>=steps().length-1)i=0;
+  $("play").textContent="Pause";render();timer=setInterval(go,delay());
+};
+$("reset").onclick=reset;
+$("spd").oninput=()=>{if(timer){clearInterval(timer);timer=setInterval(go,delay())}};
+$("swA").onclick=()=>{A=!A;reset()};
+$("swB").onclick=()=>{B=!B;reset()};
+$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  gate=b.dataset.g;
+  $("tabs").querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  reset();
+});
+$("quiz").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  const ok=b.dataset.r==="1";b.classList.add(ok?"right":"wrong");
+  $("qres").textContent=ok?"Correct. With or, one True is enough.":"Not quite. Choose the "+"or"+" tab and try A = ON, B = OFF.";
+});
+render();
+</script>
+</body>
+</html>
